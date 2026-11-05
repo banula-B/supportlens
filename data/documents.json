@@ -1,0 +1,20 @@
+[
+  {
+    "id": "doc-001",
+    "title": "Resetting your password",
+    "source": "demo://account/password-reset",
+    "content": "If you cannot log in because you forgot your password, select Forgot Password on the login page. Enter your registered email address to receive a password reset link."
+  },
+  {
+    "id": "doc-002",
+    "title": "Background jobs are not running",
+    "source": "demo://jobs/troubleshooting",
+    "content": "If background jobs are not running, check whether the worker process is active. Confirm that the worker can connect to Redis and that the queue name matches the application configuration."
+  },
+  {
+    "id": "doc-003",
+    "title": "Uploading documents",
+    "source": "demo://documents/upload",
+    "content": "To upload documents, open the Documents page and select Upload. This demo application accepts PDF and TXT files. The maximum file size is 10 MB."
+  }
+]
