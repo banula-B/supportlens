@@ -26,6 +26,22 @@ TEST_CASES = [
         "question": "Does the application support dark mode?",
         "expected_id": None,
     },
+        {
+        "question": "Does the password reset link expire after 15 minutes?",
+        "expected_id": None,
+    },
+    {
+        "question": "Can I upload a file larger than 10 MB?",
+        "expected_id": "doc-003",
+    },
+    {
+        "question": "Are uploaded documents encrypted at rest?",
+        "expected_id": None,
+    },
+    {
+        "question": "How many times does the worker retry a failed job?",
+        "expected_id": None,
+    },
 ]
 
 
