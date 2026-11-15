@@ -16,5 +16,29 @@
     "title": "Uploading documents",
     "source": "demo://documents/upload",
     "content": "To upload documents, open the Documents page and select Upload. This demo application accepts PDF and TXT files. The maximum file size is 10 MB."
+  },
+  {
+  "id": "doc-004",
+  "title": "Expired password reset links",
+  "source": "demo://account/expired-reset-link",
+  "content": "Error AUTH-410 means the password reset link has expired. Request a new link from the Forgot Password page. This documentation does not specify the link expiry duration."
+  },
+  {
+  "id": "doc-005",
+  "title": "Locked accounts",
+  "source": "demo://account/locked",
+  "content": "Error AUTH-423 means the account is locked after repeated failed login attempts. Contact the workspace administrator to unlock it. Resetting the password does not unlock the account."
+  },
+  {
+  "id": "doc-006",
+  "title": "Unsupported upload formats",
+  "source": "demo://documents/unsupported-format",
+  "content": "Error DOC-415 means the uploaded file format is unsupported. Convert the document to PDF or TXT before uploading it again. Renaming a file extension does not convert its format."
+  },
+  {
+  "id": "doc-007",
+  "title": "Uploads exceeding the size limit",
+  "source": "demo://documents/size-limit",
+  "content": "Error DOC-413 means the uploaded file exceeds the 10 MB limit. Split the document into smaller files before uploading it again. Files larger than 10 MB are rejected."
   }
 ]
