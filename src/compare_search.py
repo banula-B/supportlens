@@ -30,16 +30,17 @@ def main():
 
     for case in TEST_CASES:
         question = case["question"]
-        expected_id = case["expected_id"]
+        expected_ids = case["expected_ids"]
 
         print(f"\nQuestion: {question}")
+        print(f"Directly answerable: {case['answerable']}")
 
-        if expected_id is None:
+        if expected_ids is None:
             unsupported_cases += 1
             print("Label: insufficient evidence to answer")
         else:
             retrieval_cases += 1
-            print(f"Target passage: {expected_id}")
+            print(f"Target passage: {expected_ids}")
 
         for name, search in methods.items():
             results = search(question)
@@ -48,12 +49,12 @@ def main():
                 if results else None
             )
 
-            if expected_id is None:
+            if expected_ids is None:
                 # A retrieved candidate is not a generated answer.
                 print(f"  {name:8}: candidate={actual_id}")
                 continue
 
-            correct = actual_id == expected_id
+            correct = actual_id in expected_ids
             hits[name] += int(correct)
 
             status = "HIT" if correct else "MISS"
@@ -73,7 +74,7 @@ def main():
         print("No labeled retrieval cases.")
 
     print(
-        f"\nInsufficient-evidence cases inspected: "
+        f"\nCases with no relevant passage inspected: "
         f"{unsupported_cases}"
     )
     print("Answer support and abstention are not evaluated yet.")
