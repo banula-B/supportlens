@@ -3,6 +3,10 @@ import re
 from answer_generator import AnswerGenerator
 from hybrid_search import HybridSearch
 from main import DOCUMENTS_PATH, load_documents
+from verifier import CitationVerifier
+
+generator = AnswerGenerator()
+verifier = CitationVerifier(generator.client, generator.model)
 
 
 def check_citation_ids(answer, results):
@@ -46,6 +50,20 @@ def main():
             try:
                 answer = generator.generate(question, results)
                 check_citation_ids(answer, results)
+                verification = None
+
+                if answer.status == "answered":
+                    verification = verifier.verify(answer, results)
+
+                    if verification.verdict != "supported":
+                        print("\nStatus: verification_failed")
+                        print(
+                            "The draft answer did not pass the evidence "
+                            "check, so it has been withheld."
+                        )
+                        print(f"Check result: {verification.verdict}")
+                        print(f"Reason: {verification.reason}")
+                        continue
             except Exception as error:
                 # Avoid printing request details or credentials.
                 print(f"Request failed: {type(error).__name__}")
@@ -71,7 +89,14 @@ def main():
                             f"{document['title']} — {document['source']}"
                         )
 
-            print("\nCitation IDs checked; claim support is not verified.")
+            if verification is not None:
+                print("\nModel-based claim-support check: passed.")
+                print("This check can still make mistakes.")
+            else:
+                print(
+                    "\nCitation IDs checked. Claim-support checking "
+                    "was skipped for this non-answer status."
+                )
 
     finally:
         generator.close()
