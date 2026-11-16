@@ -5,8 +5,6 @@ from main import DOCUMENTS_PATH, load_documents, search_documents
 
 def main():
     documents = load_documents(DOCUMENTS_PATH)
-
-    # HybridSearch already creates both underlying searchers.
     hybrid = HybridSearch(documents)
 
     methods = {
@@ -26,7 +24,7 @@ def main():
 
     hits = {name: 0 for name in methods}
     retrieval_cases = 0
-    unsupported_cases = 0
+    no_relevant_cases = 0
 
     for case in TEST_CASES:
         question = case["question"]
@@ -35,12 +33,12 @@ def main():
         print(f"\nQuestion: {question}")
         print(f"Directly answerable: {case['answerable']}")
 
-        if expected_ids is None:
-            unsupported_cases += 1
-            print("Label: insufficient evidence to answer")
+        if not expected_ids:
+            no_relevant_cases += 1
+            print("Label: no relevant passage")
         else:
             retrieval_cases += 1
-            print(f"Target passage: {expected_ids}")
+            print(f"Acceptable passages: {expected_ids}")
 
         for name, search in methods.items():
             results = search(question)
@@ -49,9 +47,8 @@ def main():
                 if results else None
             )
 
-            if expected_ids is None:
-                # A retrieved candidate is not a generated answer.
-                print(f"  {name:8}: candidate={actual_id}")
+            if not expected_ids:
+                print(f"  {name:8}: candidate={actual_id} [INSPECT]")
                 continue
 
             correct = actual_id in expected_ids
@@ -74,8 +71,8 @@ def main():
         print("No labeled retrieval cases.")
 
     print(
-        f"\nCases with no relevant passage inspected: "
-        f"{unsupported_cases}"
+        "\nCases with no relevant passage inspected: "
+        f"{no_relevant_cases}"
     )
     print("Answer support and abstention are not evaluated yet.")
 
