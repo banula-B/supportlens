@@ -28,6 +28,9 @@ Rules:
    - unsupported: at least one claim is contradicted or not established;
    - uncertain: you cannot reliably decide.
 9. Give a short reason identifying any problematic claim.
+10. In your reason, distinguish contradiction from missing support.
+    Use "contradicted" only when the evidence establishes an incompatible
+    claim. Otherwise explain that the claim is not established.
 """
 
 
