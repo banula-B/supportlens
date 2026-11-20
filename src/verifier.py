@@ -61,6 +61,7 @@ class CitationVerifier:
 
         response = self.client.interactions.create(
             model=self.model,
+            timeout=60,
             input=VERIFIER_INSTRUCTIONS + "\n\nINPUT DATA:\n" + payload,
             response_format={
                 "type": "text",
