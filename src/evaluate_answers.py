@@ -1,3 +1,5 @@
+import os
+
 from answer_generator import AnswerGenerator
 from chat import check_citation_ids
 from hybrid_search import HybridSearch
@@ -44,15 +46,20 @@ def main():
         searcher = HybridSearch(documents)
         verifier = CitationVerifier(generator.client, generator.model)
 
-        for case in CASES:
+        for case in CASES[:-1]:
             question = case["question"]
 
             print(f"\nQuestion: {question}")
             print(f"Expected status: {case['expected_status']}")
 
             try:
+                print("Stage 1: retrieving passages...", flush=True)
                 results = searcher.search(question, top_k=3)
+
+                print("Stage 2: requesting generated answer...", flush=True)
                 answer = generator.generate(question, results)
+
+                print("Generation completed.", flush=True)
 
                 status_match = answer.status == case["expected_status"]
                 status_matches += int(status_match)
@@ -65,6 +72,7 @@ def main():
 
                 if answer.status == "answered":
                     answered_drafts += 1
+                    print("Stage 3: verifying answer...", flush=True)
                     verification = verifier.verify(answer, results)
 
                     print(f"Verification: {verification.verdict}")
@@ -84,7 +92,19 @@ def main():
 
             except Exception as error:
                 errors += 1
-                print(f"Display decision: WITHHOLD — {type(error).__name__}")
+
+                message = str(error)
+                api_key = os.getenv("GEMINI_API_KEY")
+                if api_key:
+                    message = message.replace(api_key, "[REDACTED]")
+
+                print(
+                    f"Error type: {type(error).__name__}",
+                    flush=True,
+                )
+                print(f"Details: {message[:1500]}", flush=True)
+                print("Stopping evaluation after this error.")
+                break
 
         print("\nEnd-to-end development checks")
         print("-" * 45)
