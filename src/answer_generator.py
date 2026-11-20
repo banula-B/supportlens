@@ -6,6 +6,7 @@ from typing import Literal
 from dotenv import load_dotenv
 from google import genai
 from pydantic import BaseModel, Field
+from google.genai import types
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -54,7 +55,13 @@ class AnswerGenerator:
                 "Set GEMINI_API_KEY and GEMINI_MODEL in the project .env."
             )
 
-        self.client = genai.Client(api_key=api_key)
+        self.client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(
+            timeout=60_000,
+            retry_options=types.HttpRetryOptions(attempts=1),
+            ),
+        )
 
     def generate(self, question, results):
         evidence = [
@@ -73,6 +80,7 @@ class AnswerGenerator:
 
         response = self.client.interactions.create(
             model=self.model,
+            timeout=60,
             input=INSTRUCTIONS + "\n\nINPUT DATA:\n" + payload,
             response_format={
                 "type": "text",
