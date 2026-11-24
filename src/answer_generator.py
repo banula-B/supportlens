@@ -44,6 +44,20 @@ Rules:
 6. Keep the answer concise.
 7. citation_ids must contain exactly the IDs cited in the answer.
 8. Return only a JSON object matching the supplied schema.
+
+Citation format:
+- In answer text, write each citation separately: [doc-005].
+- In citation_ids, use bare IDs: ["doc-005"].
+- Do not put brackets inside citation_ids.
+- Do not combine IDs inside one bracket.
+- Every inline citation must appear in citation_ids, and vice versa.
+
+Valid example:
+{
+  "status": "answered",
+  "answer": "Contact the workspace administrator [doc-005].",
+  "citation_ids": ["doc-005"]
+}
 """
 
 
