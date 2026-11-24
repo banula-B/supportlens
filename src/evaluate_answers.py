@@ -37,6 +37,7 @@ def main():
     selected_cases = CASES[:1]
 
     generator = AnswerGenerator()
+    print(f"Using model: {generator.model}", flush=True)
 
     attempted = 0
     generated = 0
@@ -126,10 +127,10 @@ def main():
                 errors += 1
 
                 message = str(error)
-                api_key = os.getenv("GEMINI_API_KEY")
-
-                if api_key:
-                    message = message.replace(api_key, "[REDACTED]")
+                for variable in ("GEMINI_API_KEY", "GROQ_API_KEY"):
+                    api_key = os.getenv(variable)
+                    if api_key:
+                        message = message.replace(api_key, "[REDACTED]")
 
                 print(
                     "Display decision: WITHHOLD (processing error)",
