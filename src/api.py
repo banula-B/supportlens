@@ -1,3 +1,5 @@
+from pathlib import Path
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from threading import Lock
 from typing import Literal
@@ -65,6 +67,13 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+WEB_PAGE = Path(__file__).resolve().parent / "web" / "index.html"
+
+
+@app.get("/", response_class=FileResponse, include_in_schema=False)
+def home():
+    return FileResponse(WEB_PAGE)
 
 
 @app.get("/health")

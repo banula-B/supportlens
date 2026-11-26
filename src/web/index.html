@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SupportLens</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: system-ui, sans-serif;
+      color: #17243b;
+      background: #f3f6fb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body { margin: 0; padding: 40px 20px; }
+
+    main { max-width: 780px; margin: auto; }
+
+    .eyebrow {
+      color: #52627c;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1 { margin: 10px 0; font-size: 40px; }
+
+    .intro { color: #52627c; line-height: 1.6; }
+
+    .card {
+      background: white;
+      border: 1px solid #dfe5ef;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    label { display: block; font-weight: 650; margin-bottom: 12px; }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      padding: 14px;
+      border: 1px solid #bcc8da;
+      border-radius: 10px;
+      font: inherit;
+      line-height: 1.5;
+    }
+
+    textarea:focus {
+      outline: 3px solid #dbeafe;
+      border-color: #2563eb;
+    }
+
+    button {
+      margin-top: 14px;
+      background: #245bdb;
+      color: white;
+      border: 0;
+      border-radius: 9px;
+      padding: 12px 20px;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button:disabled { opacity: 0.6; cursor: wait; }
+
+    .muted { color: #61708a; font-size: 14px; line-height: 1.6; }
+
+    #progress { min-height: 24px; margin-bottom: 0; }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      background: #eaf0ff;
+      color: #244a9b;
+    }
+
+    .badge[data-kind="answered"] {
+      background: #e5f5ed;
+      color: #166344;
+    }
+
+    .badge[data-kind="error"],
+    .badge[data-kind="withheld"] {
+      background: #fff0e6;
+      color: #963e12;
+    }
+
+    #answer { white-space: pre-wrap; line-height: 1.8; }
+
+    #sources { padding-left: 20px; }
+
+    #sources li { margin-bottom: 12px; line-height: 1.5; }
+
+    .source-location {
+      display: block;
+      color: #61708a;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    footer { margin-top: 24px; }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 500px) {
+      body { padding: 24px 14px; }
+      h1 { font-size: 32px; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Evidence-based support</div>
+      <h1>SupportLens</h1>
+      <p class="intro">
+        Ask about account access, document uploads, or background jobs.
+        Answers use a small demonstration knowledge base and show their sources.
+      </p>
+    </header>
+
+    <section class="card">
+      <form id="question-form">
+        <label for="question">What do you need help with?</label>
+        <textarea
+          id="question"
+          name="question"
+          maxlength="2000"
+          required
+          placeholder="For example: Will resetting my password resolve AUTH-423?"
+        ></textarea>
+
+        <button id="submit-button" type="submit">Ask SupportLens</button>
+        <p id="progress" class="muted" role="status"></p>
+      </form>
+    </section>
+
+    <section id="result" class="card" aria-live="polite" hidden>
+      <span id="status" class="badge"></span>
+      <p id="answer"></p>
+      <p id="verification" class="muted"></p>
+
+      <div id="sources-section" hidden>
+        <h2>Sources</h2>
+        <ul id="sources"></ul>
+      </div>
+    </section>
+
+    <footer class="muted">
+      Portfolio demonstration · Model-based verification can make mistakes.
+    </footer>
+  </main>
+
+  <script>
+    const form = document.getElementById("question-form");
+    const questionInput = document.getElementById("question");
+    const submitButton = document.getElementById("submit-button");
+    const progress = document.getElementById("progress");
+    const result = document.getElementById("result");
+    const statusBadge = document.getElementById("status");
+    const answerText = document.getElementById("answer");
+    const verificationText = document.getElementById("verification");
+    const sourcesSection = document.getElementById("sources-section");
+    const sourcesList = document.getElementById("sources");
+
+    const statusLabels = {
+      answered: "Answered",
+      clarification_needed: "More detail needed",
+      insufficient_evidence: "Insufficient evidence"
+    };
+
+    function showResult(kind, label, message) {
+      statusBadge.dataset.kind = kind;
+      statusBadge.textContent = label;
+      answerText.textContent = message;
+      result.hidden = false;
+    }
+
+    function resetResult() {
+      result.hidden = true;
+      answerText.textContent = "";
+      verificationText.textContent = "";
+      sourcesList.replaceChildren();
+      sourcesSection.hidden = true;
+    }
+
+    function getErrorMessage(data, httpStatus) {
+      if (typeof data.detail === "string") {
+        return data.detail;
+      }
+
+      if (Array.isArray(data.detail)) {
+        return data.detail
+          .map(item => item.msg || "Invalid request.")
+          .join(" ");
+      }
+
+      return `The request failed (HTTP ${httpStatus}).`;
+    }
+
+    questionInput.addEventListener("input", () => {
+      questionInput.setCustomValidity("");
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const question = questionInput.value.trim();
+
+      if (!question) {
+        questionInput.setCustomValidity("Please enter a question.");
+        questionInput.reportValidity();
+        return;
+      }
+
+      resetResult();
+      submitButton.disabled = true;
+      questionInput.disabled = true;
+      submitButton.textContent = "Working…";
+      progress.textContent =
+        "Retrieving evidence and checking the response. This may take a minute.";
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 150000);
+
+      try {
+        const response = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question }),
+          signal: controller.signal
+        });
+
+        let data;
+
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error(
+            `The server returned an unreadable response (HTTP ${response.status}).`
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(getErrorMessage(data, response.status));
+        }
+
+        // Never display a withheld draft, even if one is returned.
+        if (data.withheld === true) {
+          showResult(
+            "withheld",
+            "Answer withheld",
+            "The draft did not pass the evidence check. Please add more detail or rephrase your question."
+          );
+
+          verificationText.textContent =
+            "No draft answer is displayed because support could not be confirmed.";
+          return;
+        }
+
+        if (
+          data.withheld !== false ||
+          !data.answer ||
+          typeof data.answer.answer !== "string" ||
+          !Object.hasOwn(statusLabels, data.answer.status)
+        ) {
+          throw new Error("The server returned an unexpected response format.");
+        }
+
+        const answer = data.answer;
+
+        if (
+          answer.status === "answered" &&
+          data.verification_status !== "supported"
+        ) {
+          showResult(
+            "withheld",
+            "Answer withheld",
+            "The response did not include a successful claim-support check."
+          );
+          return;
+        }
+
+        showResult(
+          answer.status,
+          statusLabels[answer.status],
+          answer.answer
+        );
+
+        verificationText.textContent =
+          answer.status === "answered"
+            ? "Model-based claim-support check: passed. This is not a guarantee of correctness."
+            : "Claim-support verification was skipped for this non-answer response.";
+
+        if (Array.isArray(data.sources) && data.sources.length > 0) {
+          for (const source of data.sources) {
+            const item = document.createElement("li");
+            const title = document.createElement("strong");
+            const location = document.createElement("span");
+
+            title.textContent = `[${source.id}] ${source.title}`;
+            location.className = "source-location";
+            location.textContent = source.source;
+
+            item.append(title, location);
+            sourcesList.appendChild(item);
+          }
+
+          sourcesSection.hidden = false;
+        }
+      } catch (error) {
+        const message =
+          error.name === "AbortError"
+            ? "The browser stopped waiting after 150 seconds. The server may still be processing the request."
+            : error instanceof TypeError
+              ? "Could not reach SupportLens. Check that the local API server is running."
+              : error.message || "An unexpected error occurred.";
+
+        showResult("error", "Request unsuccessful", message);
+      } finally {
+        clearTimeout(timeout);
+        submitButton.disabled = false;
+        questionInput.disabled = false;
+        submitButton.textContent = "Ask SupportLens";
+        progress.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
