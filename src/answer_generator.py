@@ -74,10 +74,21 @@ For status "insufficient_evidence":
 - Do not put citations in message.
 
 For status "clarification_needed":
+- Choose this status when the user describes a problem but does not
+  provide enough information to select the applicable procedure.
+- If multiple documented causes require different actions and the
+  user's message does not distinguish them, ask a clarifying question.
+- General account-access problems without a specific symptom, cause,
+  or error code require clarification.
+- Do not replace clarification with a list of possible fixes.
 - Set claims to an empty list.
-- Use message to ask for the missing details.
-- Do not assume a cause for an ambiguous account-access problem.
+- Use message to ask one focused question about the missing detail.
 - Do not put citations in message.
+
+Distinguish ambiguous problems from explicit procedure requests:
+- "I cannot access my account" requires clarification.
+- "How do I reset my password?" is an explicit procedure request.
+- "I received AUTH-423" identifies a documented error.
 
 Never invent values, durations, policies, or procedures.
 Use only document IDs present in the supplied evidence.
