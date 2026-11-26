@@ -32,12 +32,10 @@ CASES = [
 
 
 def main():
-    # Run one case while diagnosing API access and conserving quota.
-    # Change to CASES when ready to evaluate all five questions.
-    selected_cases = CASES[:1]
+    # Use CASES to run all five tests once this single case works.
+    selected_cases = CASES[1:]
 
     generator = AnswerGenerator()
-    print(f"Using model: {generator.model}", flush=True)
 
     attempted = 0
     generated = 0
@@ -51,11 +49,19 @@ def main():
     errors = 0
 
     try:
+        print(f"Using model: {generator.model}", flush=True)
+
         documents = load_documents(DOCUMENTS_PATH)
         searcher = HybridSearch(documents)
-        verifier = CitationVerifier(generator.client, generator.model)
+        verifier = CitationVerifier(
+            generator.client,
+            generator.model,
+        )
 
-        print(f"\nSelected cases: {len(selected_cases)}", flush=True)
+        print(
+            f"\nSelected cases: {len(selected_cases)}",
+            flush=True,
+        )
 
         for case in selected_cases:
             attempted += 1
@@ -68,7 +74,10 @@ def main():
             )
 
             try:
-                print("Stage 1: retrieving passages...", flush=True)
+                print(
+                    "Stage 1: retrieving passages...",
+                    flush=True,
+                )
                 results = searcher.search(question, top_k=3)
 
                 print(
@@ -80,20 +89,36 @@ def main():
 
                 print("Generation completed.", flush=True)
 
-                status_match = answer.status == case["expected_status"]
+                status_match = (
+                    answer.status == case["expected_status"]
+                )
                 status_matches += int(status_match)
 
-                print(f"Generated status: {answer.status}", flush=True)
-                print(f"Status match: {status_match}", flush=True)
+                print(
+                    f"Generated status: {answer.status}",
+                    flush=True,
+                )
+                print(
+                    f"Status match: {status_match}",
+                    flush=True,
+                )
 
                 print("Checking citation IDs...", flush=True)
                 check_citation_ids(answer, results)
                 citation_checks_passed += 1
 
+                print(
+                    "Structural citation check: passed.",
+                    flush=True,
+                )
+
                 if answer.status == "answered":
                     verification_attempted += 1
-                    print("Stage 3: verifying answer...", flush=True)
 
+                    print(
+                        "Stage 3: verifying answer...",
+                        flush=True,
+                    )
                     verification = verifier.verify(answer, results)
                     verification_completed += 1
 
@@ -101,10 +126,14 @@ def main():
                         f"Verification: {verification.verdict}",
                         flush=True,
                     )
-                    print(f"Reason: {verification.reason}", flush=True)
+                    print(
+                        f"Reason: {verification.reason}",
+                        flush=True,
+                    )
 
                     if verification.verdict != "supported":
                         withheld += 1
+
                         print(
                             "Display decision: WITHHOLD "
                             "(verifier did not approve)",
@@ -113,6 +142,7 @@ def main():
                         continue
 
                     supported_drafts += 1
+
                 else:
                     print(
                         "Verification: skipped for non-answer status",
@@ -120,27 +150,55 @@ def main():
                     )
 
                 displayed += 1
+
                 print("Display decision: SHOW", flush=True)
                 print(f"Response: {answer.answer}", flush=True)
+
+                if answer.citation_ids:
+                    print("Cited sources:", flush=True)
+                    cited_ids = set(answer.citation_ids)
+
+                    for result in results:
+                        document = result["document"]
+
+                        if document["id"] in cited_ids:
+                            print(
+                                f"  [{document['id']}] "
+                                f"{document['title']} — "
+                                f"{document['source']}",
+                                flush=True,
+                            )
 
             except Exception as error:
                 errors += 1
 
                 message = str(error)
-                for variable in ("GEMINI_API_KEY", "GROQ_API_KEY"):
+
+                for variable in (
+                    "GROQ_API_KEY",
+                    "GEMINI_API_KEY",
+                ):
                     api_key = os.getenv(variable)
+
                     if api_key:
-                        message = message.replace(api_key, "[REDACTED]")
+                        message = message.replace(
+                            api_key,
+                            "[REDACTED]",
+                        )
 
                 print(
-                    "Display decision: WITHHOLD (processing error)",
+                    "Display decision: WITHHOLD "
+                    "(processing error)",
                     flush=True,
                 )
                 print(
                     f"Error type: {type(error).__name__}",
                     flush=True,
                 )
-                print(f"Details: {message[:1500]}", flush=True)
+                print(
+                    f"Details: {message[:1500]}",
+                    flush=True,
+                )
                 print(
                     "Stopping evaluation after this error.",
                     flush=True,
@@ -154,7 +212,9 @@ def main():
         print(f"Generated responses: {generated}")
 
         if generated:
-            print(f"Status matches: {status_matches}/{generated}")
+            print(
+                f"Status matches: {status_matches}/{generated}"
+            )
             print(
                 "Structural citation checks passed: "
                 f"{citation_checks_passed}/{generated}"
@@ -163,8 +223,12 @@ def main():
             print("Status matches: not evaluated")
             print("Structural citation checks: not evaluated")
 
-        print(f"Verification attempts: {verification_attempted}")
-        print(f"Completed verifications: {verification_completed}")
+        print(
+            f"Verification attempts: {verification_attempted}"
+        )
+        print(
+            f"Completed verifications: {verification_completed}"
+        )
 
         if verification_completed:
             print(
