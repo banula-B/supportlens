@@ -3,234 +3,566 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SupportLens</title>
+  <title>SupportLens Chat</title>
+
   <style>
     :root {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      color: #1e293b;
+      background: #f5f7fb;
       color-scheme: light;
-      font-family: system-ui, sans-serif;
-      color: #17243b;
-      background: #f3f6fb;
     }
 
     * { box-sizing: border-box; }
 
-    body { margin: 0; padding: 40px 20px; }
+    body { margin: 0; }
 
-    main { max-width: 780px; margin: auto; }
+    button, textarea { font: inherit; }
 
-    .eyebrow {
-      color: #52627c;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+    button { cursor: pointer; }
+
+    button:disabled { cursor: wait; opacity: 0.6; }
+
+    button:focus-visible, textarea:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 3px;
     }
-
-    h1 { margin: 10px 0; font-size: 40px; }
-
-    .intro { color: #52627c; line-height: 1.6; }
-
-    .card {
-      background: white;
-      border: 1px solid #dfe5ef;
-      border-radius: 16px;
-      padding: 24px;
-      margin-top: 24px;
-    }
-
-    label { display: block; font-weight: 650; margin-bottom: 12px; }
-
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      resize: vertical;
-      padding: 14px;
-      border: 1px solid #bcc8da;
-      border-radius: 10px;
-      font: inherit;
-      line-height: 1.5;
-    }
-
-    textarea:focus {
-      outline: 3px solid #dbeafe;
-      border-color: #2563eb;
-    }
-
-    button {
-      margin-top: 14px;
-      background: #245bdb;
-      color: white;
-      border: 0;
-      border-radius: 9px;
-      padding: 12px 20px;
-      font: inherit;
-      font-weight: 650;
-      cursor: pointer;
-    }
-
-    button:disabled { opacity: 0.6; cursor: wait; }
-
-    .muted { color: #61708a; font-size: 14px; line-height: 1.6; }
-
-    #progress { min-height: 24px; margin-bottom: 0; }
-
-    .badge {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 700;
-      background: #eaf0ff;
-      color: #244a9b;
-    }
-
-    .badge[data-kind="answered"] {
-      background: #e5f5ed;
-      color: #166344;
-    }
-
-    .badge[data-kind="error"],
-    .badge[data-kind="withheld"] {
-      background: #fff0e6;
-      color: #963e12;
-    }
-
-    #answer { white-space: pre-wrap; line-height: 1.8; }
-
-    #sources { padding-left: 20px; }
-
-    #sources li { margin-bottom: 12px; line-height: 1.5; }
-
-    .source-location {
-      display: block;
-      color: #61708a;
-      font-size: 13px;
-      overflow-wrap: anywhere;
-    }
-
-    footer { margin-top: 24px; }
 
     [hidden] { display: none !important; }
 
-    @media (max-width: 500px) {
-      body { padding: 24px 14px; }
-      h1 { font-size: 32px; }
-      .card { padding: 18px; }
+    .app {
+      max-width: 960px;
+      margin: auto;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-inline: 1px solid #e2e8f0;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 26px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      font-weight: 800;
+    }
+
+    h1 { font-size: 20px; margin: 0; }
+
+    .subtitle {
+      font-size: 12px;
+      color: #64748b;
+      margin: 4px 0 0;
+    }
+
+    .new-chat {
+      border: 1px solid #cbd5e1;
+      background: white;
+      padding: 9px 13px;
+      border-radius: 9px;
+      white-space: nowrap;
+      color: #334155;
+    }
+
+    .conversation {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 28px;
+    }
+
+    .welcome {
+      max-width: 600px;
+      margin: 50px auto;
+      text-align: center;
+    }
+
+    .welcome h2 { font-size: 28px; margin-bottom: 12px; }
+
+    .welcome p { color: #64748b; line-height: 1.7; }
+
+    .suggestions {
+      display: grid;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .suggestion {
+      text-align: left;
+      padding: 15px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .suggestion:hover { background: #eff6ff; border-color: #bfdbfe; }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .message.user { align-items: flex-end; }
+
+    .speaker {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      margin: 0 8px 7px;
+    }
+
+    .bubble {
+      max-width: 88%;
+      padding: 16px 18px;
+      background: #f1f5f9;
+      border-radius: 16px 16px 16px 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .user .bubble {
+      background: #2563eb;
+      color: white;
+      border-radius: 16px 16px 4px 16px;
+    }
+
+    .message-text {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: #e0e7ff;
+      color: #3730a3;
+      margin-bottom: 10px;
+    }
+
+    .badge[data-kind="answered"] {
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .badge[data-kind="withheld"],
+    .badge[data-kind="error"] {
+      color: #9a3412;
+      background: #ffedd5;
+    }
+
+    .verification {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 12px 0 0;
+    }
+
+    details {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #dbe3ed;
+      font-size: 13px;
+    }
+
+    summary { cursor: pointer; font-weight: 650; }
+
+    .sources { padding-left: 18px; margin-bottom: 0; }
+
+    .sources li { margin: 10px 0; line-height: 1.5; }
+
+    .source-location {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 24px;
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #64748b;
+      animation: pulse 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    .typing-label { color: #64748b; font-size: 12px; margin-top: 8px; }
+
+    @keyframes pulse {
+      0%, 80%, 100% { opacity: 0.35; }
+      40% { opacity: 1; }
+    }
+
+    .composer-area {
+      padding: 16px 26px;
+      border-top: 1px solid #e2e8f0;
+      background: white;
+    }
+
+    form {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    form:focus-within { border-color: #2563eb; }
+
+    textarea {
+      flex: 1;
+      min-width: 0;
+      min-height: 48px;
+      max-height: 150px;
+      resize: none;
+      border: 0;
+      background: transparent;
+      padding: 12px 8px;
+      line-height: 1.5;
+      color: #1e293b;
+    }
+
+    textarea:focus-visible { outline: none; }
+
+    .send {
+      background: #2563eb;
+      color: white;
+      border: 0;
+      padding: 12px 18px;
+      border-radius: 9px;
+    }
+
+    .footnote {
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.6;
+      margin: 10px 0 0;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 16px; }
+      .conversation { padding: 18px 14px; }
+      .composer-area { padding: 12px; }
+      .bubble { max-width: 95%; }
+      .welcome { margin-top: 28px; }
+      .welcome h2 { font-size: 24px; }
+      .subtitle { max-width: 180px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .typing span { animation: none; }
     }
   </style>
 </head>
 
 <body>
-  <main>
+  <main class="app">
     <header>
-      <div class="eyebrow">Evidence-based support</div>
-      <h1>SupportLens</h1>
-      <p class="intro">
-        Ask about account access, document uploads, or background jobs.
-        Answers use a small demonstration knowledge base and show their sources.
-      </p>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">S</div>
+        <div>
+          <h1>SupportLens</h1>
+          <p class="subtitle">Support answers with evidence</p>
+        </div>
+      </div>
+
+      <button id="new-chat" class="new-chat" type="button">
+        New chat
+      </button>
     </header>
 
-    <section class="card">
-      <form id="question-form">
-        <label for="question">What do you need help with?</label>
+    <section
+      id="conversation"
+      class="conversation"
+      aria-label="Conversation"
+    >
+      <div id="welcome" class="welcome">
+        <h2>How can I help?</h2>
+        <p>
+          Ask about account access, document uploads, or background jobs
+          in the demonstration knowledge base.
+        </p>
+
+        <div class="suggestions">
+          <button class="suggestion" type="button">
+            Will resetting my password resolve AUTH-423?
+          </button>
+          <button class="suggestion" type="button">
+            Can I upload a file larger than 10 MB?
+          </button>
+          <button class="suggestion" type="button">
+            How do I reset my password?
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="messages"
+        role="log"
+        aria-label="Chat messages"
+        aria-live="polite"
+        aria-relevant="additions text"
+      ></div>
+    </section>
+
+    <div class="composer-area">
+      <form id="chat-form">
         <textarea
           id="question"
-          name="question"
+          aria-label="Your support question"
+          placeholder="Ask a support question…"
           maxlength="2000"
+          rows="1"
           required
-          placeholder="For example: Will resetting my password resolve AUTH-423?"
         ></textarea>
 
-        <button id="submit-button" type="submit">Ask SupportLens</button>
-        <p id="progress" class="muted" role="status"></p>
+        <button id="send-button" class="send" type="submit">
+          Send
+        </button>
       </form>
-    </section>
 
-    <section id="result" class="card" aria-live="polite" hidden>
-      <span id="status" class="badge"></span>
-      <p id="answer"></p>
-      <p id="verification" class="muted"></p>
-
-      <div id="sources-section" hidden>
-        <h2>Sources</h2>
-        <ul id="sources"></ul>
-      </div>
-    </section>
-
-    <footer class="muted">
-      Portfolio demonstration · Model-based verification can make mistakes.
-    </footer>
+      <p class="footnote">
+        Each message is answered independently. History clears on refresh.
+        Model checks can make mistakes.
+      </p>
+    </div>
   </main>
 
   <script>
-    const form = document.getElementById("question-form");
-    const questionInput = document.getElementById("question");
-    const submitButton = document.getElementById("submit-button");
-    const progress = document.getElementById("progress");
-    const result = document.getElementById("result");
-    const statusBadge = document.getElementById("status");
-    const answerText = document.getElementById("answer");
-    const verificationText = document.getElementById("verification");
-    const sourcesSection = document.getElementById("sources-section");
-    const sourcesList = document.getElementById("sources");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("question");
+    const sendButton = document.getElementById("send-button");
+    const newChatButton = document.getElementById("new-chat");
+    const conversation = document.getElementById("conversation");
+    const messages = document.getElementById("messages");
+    const welcome = document.getElementById("welcome");
 
-    const statusLabels = {
+    let busy = false;
+
+    const labels = {
       answered: "Answered",
       clarification_needed: "More detail needed",
       insufficient_evidence: "Insufficient evidence"
     };
 
-    function showResult(kind, label, message) {
-      statusBadge.dataset.kind = kind;
-      statusBadge.textContent = label;
-      answerText.textContent = message;
-      result.hidden = false;
+    function scrollToLatest() {
+      conversation.scrollTop = conversation.scrollHeight;
     }
 
-    function resetResult() {
-      result.hidden = true;
-      answerText.textContent = "";
-      verificationText.textContent = "";
-      sourcesList.replaceChildren();
-      sourcesSection.hidden = true;
+    function resizeInput() {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 150) + "px";
     }
 
-    function getErrorMessage(data, httpStatus) {
-      if (typeof data.detail === "string") {
-        return data.detail;
+    function setBusy(value) {
+      busy = value;
+      sendButton.disabled = value;
+      input.disabled = value;
+      newChatButton.disabled = value;
+      sendButton.textContent = value ? "Waiting…" : "Send";
+    }
+
+    function createMessage(role) {
+      const article = document.createElement("article");
+      article.className = `message ${role}`;
+
+      const speaker = document.createElement("div");
+      speaker.className = "speaker";
+      speaker.textContent = role === "user" ? "You" : "SupportLens";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      article.append(speaker, bubble);
+      messages.appendChild(article);
+
+      return { article, bubble };
+    }
+
+    function appendText(parent, text, className) {
+      const paragraph = document.createElement("p");
+      paragraph.className = className;
+      paragraph.textContent = text;
+      parent.appendChild(paragraph);
+    }
+
+    function addUserMessage(question) {
+      const message = createMessage("user");
+      appendText(message.bubble, question, "message-text");
+    }
+
+    function addTypingIndicator() {
+      const message = createMessage("assistant");
+      const dots = document.createElement("div");
+      dots.className = "typing";
+      dots.setAttribute("aria-hidden", "true");
+
+      for (let i = 0; i < 3; i++) {
+        dots.appendChild(document.createElement("span"));
       }
 
-      if (Array.isArray(data.detail)) {
+      message.bubble.appendChild(dots);
+      appendText(
+        message.bubble,
+        "Retrieving evidence and checking the response…",
+        "typing-label"
+      );
+
+      return message;
+    }
+
+    function renderMessage(message, kind, label, text, note = "") {
+      message.bubble.replaceChildren();
+
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.dataset.kind = kind;
+      badge.textContent = label;
+
+      message.bubble.appendChild(badge);
+      appendText(message.bubble, text, "message-text");
+
+      if (note) {
+        appendText(message.bubble, note, "verification");
+      }
+    }
+
+    function addSources(bubble, sources) {
+      if (!Array.isArray(sources) || sources.length === 0) return;
+
+      const details = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = `Sources (${sources.length})`;
+
+      const list = document.createElement("ul");
+      list.className = "sources";
+
+      for (const source of sources) {
+        const item = document.createElement("li");
+        const title = document.createElement("strong");
+        const location = document.createElement("span");
+
+        title.textContent = `[${source.id}] ${source.title}`;
+        location.className = "source-location";
+        location.textContent = source.source;
+
+        item.append(title, location);
+        list.appendChild(item);
+      }
+
+      details.append(summary, list);
+      bubble.appendChild(details);
+    }
+
+    function errorMessage(data, status) {
+      if (typeof data?.detail === "string") return data.detail;
+
+      if (Array.isArray(data?.detail)) {
         return data.detail
           .map(item => item.msg || "Invalid request.")
           .join(" ");
       }
 
-      return `The request failed (HTTP ${httpStatus}).`;
+      return `The request failed (HTTP ${status}).`;
     }
 
-    questionInput.addEventListener("input", () => {
-      questionInput.setCustomValidity("");
-    });
-
-    form.addEventListener("submit", async event => {
-      event.preventDefault();
-
-      const question = questionInput.value.trim();
-
-      if (!question) {
-        questionInput.setCustomValidity("Please enter a question.");
-        questionInput.reportValidity();
+    function renderResponse(message, data) {
+      // Withheld drafts must never appear in the conversation.
+      if (data?.withheld === true) {
+        renderMessage(
+          message,
+          "withheld",
+          "Answer withheld",
+          "I could not confirm that the draft was supported by the evidence.",
+          "The draft has not been displayed."
+        );
         return;
       }
 
-      resetResult();
-      submitButton.disabled = true;
-      questionInput.disabled = true;
-      submitButton.textContent = "Working…";
-      progress.textContent =
-        "Retrieving evidence and checking the response. This may take a minute.";
+      if (
+        data?.withheld !== false ||
+        !data.answer ||
+        typeof data.answer.answer !== "string" ||
+        !Object.hasOwn(labels, data.answer.status)
+      ) {
+        throw new Error("The server returned an unexpected response format.");
+      }
+
+      const answer = data.answer;
+
+      if (
+        answer.status === "answered" &&
+        data.verification_status !== "supported"
+      ) {
+        renderMessage(
+          message,
+          "withheld",
+          "Answer withheld",
+          "This response did not include a successful claim-support check."
+        );
+        return;
+      }
+
+      const note = answer.status === "answered"
+        ? "Model-based support check passed. This check can still make mistakes."
+        : "Claim-support verification was skipped for this non-answer response.";
+
+      renderMessage(
+        message,
+        answer.status,
+        labels[answer.status],
+        answer.answer,
+        note
+      );
+
+      addSources(message.bubble, data.sources);
+    }
+
+    async function sendQuestion(question) {
+      if (busy) return;
+
+      welcome.hidden = true;
+      setBusy(true);
+
+      addUserMessage(question);
+      input.value = "";
+      resizeInput();
+
+      const reply = addTypingIndicator();
+      scrollToLatest();
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 150000);
@@ -247,95 +579,86 @@
 
         try {
           data = await response.json();
-        } catch {
+        } catch (error) {
+          if (error.name === "AbortError") throw error;
           throw new Error(
             `The server returned an unreadable response (HTTP ${response.status}).`
           );
         }
 
         if (!response.ok) {
-          throw new Error(getErrorMessage(data, response.status));
+          throw new Error(errorMessage(data, response.status));
         }
 
-        // Never display a withheld draft, even if one is returned.
-        if (data.withheld === true) {
-          showResult(
-            "withheld",
-            "Answer withheld",
-            "The draft did not pass the evidence check. Please add more detail or rephrase your question."
-          );
-
-          verificationText.textContent =
-            "No draft answer is displayed because support could not be confirmed.";
-          return;
-        }
-
-        if (
-          data.withheld !== false ||
-          !data.answer ||
-          typeof data.answer.answer !== "string" ||
-          !Object.hasOwn(statusLabels, data.answer.status)
-        ) {
-          throw new Error("The server returned an unexpected response format.");
-        }
-
-        const answer = data.answer;
-
-        if (
-          answer.status === "answered" &&
-          data.verification_status !== "supported"
-        ) {
-          showResult(
-            "withheld",
-            "Answer withheld",
-            "The response did not include a successful claim-support check."
-          );
-          return;
-        }
-
-        showResult(
-          answer.status,
-          statusLabels[answer.status],
-          answer.answer
-        );
-
-        verificationText.textContent =
-          answer.status === "answered"
-            ? "Model-based claim-support check: passed. This is not a guarantee of correctness."
-            : "Claim-support verification was skipped for this non-answer response.";
-
-        if (Array.isArray(data.sources) && data.sources.length > 0) {
-          for (const source of data.sources) {
-            const item = document.createElement("li");
-            const title = document.createElement("strong");
-            const location = document.createElement("span");
-
-            title.textContent = `[${source.id}] ${source.title}`;
-            location.className = "source-location";
-            location.textContent = source.source;
-
-            item.append(title, location);
-            sourcesList.appendChild(item);
-          }
-
-          sourcesSection.hidden = false;
-        }
+        renderResponse(reply, data);
       } catch (error) {
-        const message =
-          error.name === "AbortError"
-            ? "The browser stopped waiting after 150 seconds. The server may still be processing the request."
-            : error instanceof TypeError
-              ? "Could not reach SupportLens. Check that the local API server is running."
-              : error.message || "An unexpected error occurred.";
+        const message = error.name === "AbortError"
+          ? "The browser stopped waiting after 150 seconds. The server may still be processing your question."
+          : error instanceof TypeError
+            ? "Could not reach SupportLens. Check that your local server is running."
+            : error.message || "An unexpected error occurred.";
 
-        showResult("error", "Request unsuccessful", message);
+        renderMessage(reply, "error", "Request unsuccessful", message);
       } finally {
         clearTimeout(timeout);
-        submitButton.disabled = false;
-        questionInput.disabled = false;
-        submitButton.textContent = "Ask SupportLens";
-        progress.textContent = "";
+        setBusy(false);
+        scrollToLatest();
+        input.focus();
       }
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const question = input.value.trim();
+
+      if (!question) {
+        input.setCustomValidity("Please enter a question.");
+        input.reportValidity();
+        return;
+      }
+
+      input.setCustomValidity("");
+      sendQuestion(question);
+    });
+
+    input.addEventListener("input", () => {
+      input.setCustomValidity("");
+      resizeInput();
+    });
+
+    input.addEventListener("keydown", event => {
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey &&
+        !event.isComposing
+      ) {
+        event.preventDefault();
+
+        if (!busy) {
+          form.requestSubmit();
+        }
+      }
+    });
+
+    document.querySelectorAll(".suggestion").forEach(button => {
+      button.addEventListener("click", () => {
+        if (busy) return;
+        input.value = button.textContent.trim();
+        input.setCustomValidity("");
+        form.requestSubmit();
+      });
+    });
+
+    newChatButton.addEventListener("click", () => {
+      if (busy) return;
+
+      messages.replaceChildren();
+      welcome.hidden = false;
+      input.value = "";
+      input.setCustomValidity("");
+      resizeInput();
+      input.focus();
     });
   </script>
 </body>
