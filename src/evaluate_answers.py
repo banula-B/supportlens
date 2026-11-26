@@ -1,7 +1,7 @@
 import os
 
 from answer_generator import AnswerGenerator
-from chat import check_citation_ids
+from citations import check_citation_ids
 from hybrid_search import HybridSearch
 from main import DOCUMENTS_PATH, load_documents
 from verifier import CitationVerifier
