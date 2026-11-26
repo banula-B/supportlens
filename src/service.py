@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from answer_generator import Answer, AnswerGenerator
 from citations import check_citation_ids
+from conversation import resolve_question
 from hybrid_search import HybridSearch
 from main import DOCUMENTS_PATH, load_documents
 from verifier import CitationVerifier, Verification
@@ -31,14 +32,22 @@ class SupportLensService:
             self.generator.close()
             raise
 
-    def ask(self, question):
+    def ask(self, question, history=None):
         question = question.strip()
 
         if not question:
             raise ValueError("Question cannot be blank.")
 
-        results = self.searcher.search(question, top_k=3)
-        answer = self.generator.generate(question, results)
+        resolved = resolve_question(self.generator, question, history)
+        if resolved.clarification:
+            return ServiceResult(
+                answer=Answer(status="clarification_needed",
+                              answer=resolved.clarification, citation_ids=[]),
+                verification=None, sources=[], withheld=False,
+            )
+
+        results = self.searcher.search(resolved.question, top_k=3)
+        answer = self.generator.generate(resolved.question, results)
 
         check_citation_ids(answer, results)
 

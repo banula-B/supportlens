@@ -15,10 +15,12 @@ from pydantic import BaseModel, Field, field_validator
 
 from answer_generator import Answer
 from service import SupportLensService
+from conversation import ChatMessage, MAX_HISTORY_MESSAGES
 
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
+    history: list[ChatMessage] = Field(default_factory=list, max_length=MAX_HISTORY_MESSAGES)
 
     @field_validator("question")
     @classmethod
@@ -76,6 +78,11 @@ def home():
     return FileResponse(WEB_PAGE)
 
 
+@app.get("/chat.js", include_in_schema=False)
+def chat_script():
+    return FileResponse(WEB_PAGE.parent / "chat.js", media_type="text/javascript")
+
+
 @app.get("/health")
 def health():
     # This checks the local application, not Groq availability.
@@ -94,7 +101,7 @@ def ask(payload: AskRequest, request: Request):
         )
 
     try:
-        result = request.app.state.service.ask(payload.question)
+        result = request.app.state.service.ask(payload.question, history=payload.history)
 
         verification_status = (
             result.verification.verdict
