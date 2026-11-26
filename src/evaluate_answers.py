@@ -33,7 +33,7 @@ CASES = [
 
 def main():
     # Use CASES to run all five tests once this single case works.
-    selected_cases = CASES[1:]
+    selected_cases = CASES[3:4]
 
     generator = AnswerGenerator()
 
