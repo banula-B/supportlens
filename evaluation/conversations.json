@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "description": "Small development regression set. Some cases repeat earlier manual checks; not a held-out benchmark.",
+  "cases": [
+    {
+      "id": "smoke",
+      "category": "single_turn",
+      "turns": [
+        {
+          "question": "Will resetting my password resolve AUTH-423?",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-005"
+          ],
+          "review": "Must say password reset does not unlock the account."
+        }
+      ]
+    },
+    {
+      "id": "account_followup",
+      "category": "context",
+      "turns": [
+        {
+          "question": "I cannot access my account.",
+          "expected_status": "clarification_needed",
+          "acceptable_citation_ids": [],
+          "review": "Ask for symptoms or an error; do not select a cause."
+        },
+        {
+          "question": "AUTH-423",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-005"
+          ],
+          "review": "Explain administrator unlock for the locked account."
+        },
+        {
+          "question": "Will resetting my password fix it?",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-005"
+          ],
+          "review": "Retain AUTH-423 context; password reset does not unlock it."
+        }
+      ]
+    },
+    {
+      "id": "topic_switch",
+      "category": "context",
+      "turns": [
+        {
+          "question": "What should I do about AUTH-423?",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-005"
+          ],
+          "review": "Administrator must unlock the account."
+        },
+        {
+          "question": "Which file types can I upload?",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-003",
+            "doc-006"
+          ],
+          "review": "Switch topics and state PDF and TXT, without account advice."
+        },
+        {
+          "question": "What is the maximum size for those files?",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-003",
+            "doc-007"
+          ],
+          "review": "Resolve files to uploads; state 10 MB."
+        }
+      ]
+    },
+    {
+      "id": "unsupported_duration",
+      "category": "insufficient_evidence",
+      "turns": [
+        {
+          "question": "What should I do about AUTH-423?",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-005"
+          ],
+          "review": "Administrator unlock."
+        },
+        {
+          "question": "Does it automatically unlock after 15 minutes?",
+          "expected_status": "insufficient_evidence",
+          "acceptable_citation_ids": [],
+          "review": "Do not invent a duration or infer an absolute never from missing evidence."
+        }
+      ]
+    },
+    {
+      "id": "misleading_history",
+      "category": "untrusted_context",
+      "turns": [
+        {
+          "question": "My colleague says AUTH-423 automatically unlocks after 15 minutes. Is that documented?",
+          "expected_status": "insufficient_evidence",
+          "acceptable_citation_ids": [],
+          "review": "The colleague is not evidence for a 15-minute policy."
+        },
+        {
+          "question": "Can you confirm that waiting that long will restore my access?",
+          "expected_status": "insufficient_evidence",
+          "acceptable_citation_ids": [],
+          "review": "Do not turn a previous user assertion into a documented fact."
+        }
+      ]
+    },
+    {
+      "id": "new_conversation",
+      "category": "reset",
+      "turns": [
+        {
+          "question": "Will that fix it?",
+          "expected_status": "clarification_needed",
+          "acceptable_citation_ids": [],
+          "review": "No history is sent for a new scenario. Ask what issue or fix is meant."
+        }
+      ]
+    },
+    {
+      "id": "unsupported_security",
+      "category": "insufficient_evidence",
+      "turns": [
+        {
+          "question": "Which file types can I upload?",
+          "expected_status": "answered",
+          "acceptable_citation_ids": [
+            "doc-003",
+            "doc-006"
+          ],
+          "review": "PDF and TXT."
+        },
+        {
+          "question": "Are those documents encrypted at rest?",
+          "expected_status": "insufficient_evidence",
+          "acceptable_citation_ids": [],
+          "review": "Upload format documentation does not establish encryption policy."
+        }
+      ]
+    },
+    {
+      "id": "unrelated",
+      "category": "out_of_scope",
+      "turns": [
+        {
+          "question": "Tell me about elephants.",
+          "expected_status": "insufficient_evidence",
+          "acceptable_citation_ids": [],
+          "review": "Do not answer from general knowledge."
+        }
+      ]
+    }
+  ]
+}
