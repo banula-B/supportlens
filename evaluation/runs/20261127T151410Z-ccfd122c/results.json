@@ -1,0 +1,280 @@
+{
+  "run_id": "20261127T151410Z-ccfd122c",
+  "dataset_sha256": "89c5e81d7553c5774529ba2f38db8decbc2ca4bdd4901d03a8f44d42044ce708",
+  "state": "stopped_on_error",
+  "configuration_note": "",
+  "history_policy": "Last 8 messages from successful displayed exchanges; reset per scenario.",
+  "planned_turns": 11,
+  "selected_scenarios": [
+    "topic_switch",
+    "unsupported_duration",
+    "misleading_history",
+    "new_conversation",
+    "unsupported_security",
+    "unrelated"
+  ],
+  "turns": [
+    {
+      "scenario": "topic_switch",
+      "turn": 1,
+      "category": "context",
+      "question": "What should I do about AUTH-423?",
+      "history_sent": [],
+      "expected": {
+        "question": "What should I do about AUTH-423?",
+        "expected_status": "answered",
+        "acceptable_citation_ids": [
+          "doc-005"
+        ],
+        "review": "Administrator must unlock the account."
+      },
+      "human_review": {
+        "correct": null,
+        "notes": ""
+      },
+      "response": {
+        "withheld": false,
+        "answer": {
+          "status": "answered",
+          "answer": "The account is locked due to repeated failed login attempts, and it should be unlocked by contacting the workspace administrator. [doc-005]",
+          "citation_ids": [
+            "doc-005"
+          ]
+        },
+        "verification_status": "supported",
+        "sources": [
+          {
+            "id": "doc-005",
+            "title": "Locked accounts",
+            "source": "demo://account/locked"
+          }
+        ]
+      },
+      "checks": {
+        "actual_status": "answered",
+        "status_match": true,
+        "structural_ok": true,
+        "citation_label_match": true,
+        "display_gate_ok": true,
+        "contract_pass": true
+      },
+      "latency_seconds": 1.275
+    },
+    {
+      "scenario": "topic_switch",
+      "turn": 2,
+      "category": "context",
+      "question": "Which file types can I upload?",
+      "history_sent": [
+        {
+          "role": "user",
+          "content": "What should I do about AUTH-423?"
+        },
+        {
+          "role": "assistant",
+          "content": "The account is locked due to repeated failed login attempts, and it should be unlocked by contacting the workspace administrator. [doc-005]"
+        }
+      ],
+      "expected": {
+        "question": "Which file types can I upload?",
+        "expected_status": "answered",
+        "acceptable_citation_ids": [
+          "doc-003",
+          "doc-006"
+        ],
+        "review": "Switch topics and state PDF and TXT, without account advice."
+      },
+      "human_review": {
+        "correct": null,
+        "notes": ""
+      },
+      "response": {
+        "withheld": false,
+        "answer": {
+          "status": "answered",
+          "answer": "PDF and TXT [doc-003]",
+          "citation_ids": [
+            "doc-003"
+          ]
+        },
+        "verification_status": "supported",
+        "sources": [
+          {
+            "id": "doc-003",
+            "title": "Uploading documents",
+            "source": "demo://documents/upload"
+          }
+        ]
+      },
+      "checks": {
+        "actual_status": "answered",
+        "status_match": true,
+        "structural_ok": true,
+        "citation_label_match": true,
+        "display_gate_ok": true,
+        "contract_pass": true
+      },
+      "latency_seconds": 1.249
+    },
+    {
+      "scenario": "topic_switch",
+      "turn": 3,
+      "category": "context",
+      "question": "What is the maximum size for those files?",
+      "history_sent": [
+        {
+          "role": "user",
+          "content": "What should I do about AUTH-423?"
+        },
+        {
+          "role": "assistant",
+          "content": "The account is locked due to repeated failed login attempts, and it should be unlocked by contacting the workspace administrator. [doc-005]"
+        },
+        {
+          "role": "user",
+          "content": "Which file types can I upload?"
+        },
+        {
+          "role": "assistant",
+          "content": "PDF and TXT [doc-003]"
+        }
+      ],
+      "expected": {
+        "question": "What is the maximum size for those files?",
+        "expected_status": "answered",
+        "acceptable_citation_ids": [
+          "doc-003",
+          "doc-007"
+        ],
+        "review": "Resolve files to uploads; state 10 MB."
+      },
+      "human_review": {
+        "correct": null,
+        "notes": ""
+      },
+      "response": {
+        "withheld": false,
+        "answer": {
+          "status": "answered",
+          "answer": "The maximum file size for PDFs and TXT uploads is 10 MB. [doc-003]",
+          "citation_ids": [
+            "doc-003"
+          ]
+        },
+        "verification_status": "supported",
+        "sources": [
+          {
+            "id": "doc-003",
+            "title": "Uploading documents",
+            "source": "demo://documents/upload"
+          }
+        ]
+      },
+      "checks": {
+        "actual_status": "answered",
+        "status_match": true,
+        "structural_ok": true,
+        "citation_label_match": true,
+        "display_gate_ok": true,
+        "contract_pass": true
+      },
+      "latency_seconds": 1.701
+    },
+    {
+      "scenario": "unsupported_duration",
+      "turn": 1,
+      "category": "insufficient_evidence",
+      "question": "What should I do about AUTH-423?",
+      "history_sent": [],
+      "expected": {
+        "question": "What should I do about AUTH-423?",
+        "expected_status": "answered",
+        "acceptable_citation_ids": [
+          "doc-005"
+        ],
+        "review": "Administrator unlock."
+      },
+      "human_review": {
+        "correct": null,
+        "notes": ""
+      },
+      "response": {
+        "withheld": false,
+        "answer": {
+          "status": "answered",
+          "answer": "The account is locked after repeated failed login attempts and must be unlocked by the workspace administrator. [doc-005]",
+          "citation_ids": [
+            "doc-005"
+          ]
+        },
+        "verification_status": "supported",
+        "sources": [
+          {
+            "id": "doc-005",
+            "title": "Locked accounts",
+            "source": "demo://account/locked"
+          }
+        ]
+      },
+      "checks": {
+        "actual_status": "answered",
+        "status_match": true,
+        "structural_ok": true,
+        "citation_label_match": true,
+        "display_gate_ok": true,
+        "contract_pass": true
+      },
+      "latency_seconds": 1.33
+    },
+    {
+      "scenario": "unsupported_duration",
+      "turn": 2,
+      "category": "insufficient_evidence",
+      "question": "Does it automatically unlock after 15 minutes?",
+      "history_sent": [
+        {
+          "role": "user",
+          "content": "What should I do about AUTH-423?"
+        },
+        {
+          "role": "assistant",
+          "content": "The account is locked after repeated failed login attempts and must be unlocked by the workspace administrator. [doc-005]"
+        }
+      ],
+      "expected": {
+        "question": "Does it automatically unlock after 15 minutes?",
+        "expected_status": "insufficient_evidence",
+        "acceptable_citation_ids": [],
+        "review": "Do not invent a duration or infer an absolute never from missing evidence."
+      },
+      "human_review": {
+        "correct": null,
+        "notes": ""
+      },
+      "error": {
+        "type": "HTTPError",
+        "http_status": 429
+      },
+      "latency_seconds": 0.827
+    }
+  ],
+  "summary": {
+    "planned_turns": 11,
+    "attempted_turns": 5,
+    "unattempted_turns": 6,
+    "processing_errors": 1,
+    "completed_responses": 4,
+    "status_matches": 4,
+    "status_evaluated": 4,
+    "structural_checks_passed": 4,
+    "structural_checks_evaluated": 4,
+    "answered_responses": 4,
+    "answered_with_supported_verdict": 4,
+    "withheld_responses": 0,
+    "automated_contract_passes": 4,
+    "contract_evaluated": 4,
+    "mean_completed_latency_seconds": 1.389,
+    "median_completed_latency_seconds": 1.302,
+    "human_accuracy_review": "pending; no automatic accuracy score"
+  }
+}

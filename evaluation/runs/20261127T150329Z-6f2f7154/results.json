@@ -1,0 +1,78 @@
+{
+  "run_id": "20261127T150329Z-6f2f7154",
+  "dataset_sha256": "89c5e81d7553c5774529ba2f38db8decbc2ca4bdd4901d03a8f44d42044ce708",
+  "state": "complete",
+  "configuration_note": "",
+  "history_policy": "Last 8 messages from successful displayed exchanges; reset per scenario.",
+  "planned_turns": 1,
+  "selected_scenarios": [
+    "smoke"
+  ],
+  "turns": [
+    {
+      "scenario": "smoke",
+      "turn": 1,
+      "category": "single_turn",
+      "question": "Will resetting my password resolve AUTH-423?",
+      "history_sent": [],
+      "expected": {
+        "question": "Will resetting my password resolve AUTH-423?",
+        "expected_status": "answered",
+        "acceptable_citation_ids": [
+          "doc-005"
+        ],
+        "review": "Must say password reset does not unlock the account."
+      },
+      "human_review": {
+        "correct": null,
+        "notes": ""
+      },
+      "response": {
+        "withheld": false,
+        "answer": {
+          "status": "answered",
+          "answer": "Resetting the password will not unlock the account for AUTH-423 [doc-005]",
+          "citation_ids": [
+            "doc-005"
+          ]
+        },
+        "verification_status": "supported",
+        "sources": [
+          {
+            "id": "doc-005",
+            "title": "Locked accounts",
+            "source": "demo://account/locked"
+          }
+        ]
+      },
+      "checks": {
+        "actual_status": "answered",
+        "status_match": true,
+        "structural_ok": true,
+        "citation_label_match": true,
+        "display_gate_ok": true,
+        "contract_pass": true
+      },
+      "latency_seconds": 1.443
+    }
+  ],
+  "summary": {
+    "planned_turns": 1,
+    "attempted_turns": 1,
+    "unattempted_turns": 0,
+    "processing_errors": 0,
+    "completed_responses": 1,
+    "status_matches": 1,
+    "status_evaluated": 1,
+    "structural_checks_passed": 1,
+    "structural_checks_evaluated": 1,
+    "answered_responses": 1,
+    "answered_with_supported_verdict": 1,
+    "withheld_responses": 0,
+    "automated_contract_passes": 1,
+    "contract_evaluated": 1,
+    "mean_completed_latency_seconds": 1.443,
+    "median_completed_latency_seconds": 1.443,
+    "human_accuracy_review": "pending; no automatic accuracy score"
+  }
+}
